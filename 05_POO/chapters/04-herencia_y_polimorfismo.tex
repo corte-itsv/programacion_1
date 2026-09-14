@@ -1,0 +1,161 @@
+\chapter{Herencia y Polimorfismo}
+
+\section{Herencia}
+La \textit{herencia} es un mecanismo fundamental de la POO que permite crear nuevas clases basadas en clases existentes.
+La clase original se denomina \textit{superclase} o \textit{clase padre}, mientras que la nueva clase se llama
+\textit{subclase} o \textit{clase hija}.
+
+La subclase hereda automáticamente todos los atributos y métodos de la superclase, lo que fomenta la reutilización de código
+y permite establecer jerarquías conceptuales del tipo \textit{``es-un''} (por ejemplo, un colectivo \textit{es un} vehículo).
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[node distance=1.5cm, align=center]
+    \node [draw, rectangle, fill=blue!20, minimum width=3.5cm, minimum height=1.2cm] (padre) 
+      {\textbf{Superclase}\\ \texttt{Vehicle}};
+    
+    \node [draw, rectangle, fill=green!20, minimum width=2.5cm, minimum height=1cm, below left=1cm and 0.5cm of padre] (hijo1) 
+      {\texttt{Car}};
+    
+    \node [draw, rectangle, fill=green!20, minimum width=2.5cm, minimum height=1cm, below=1cm of padre] (hijo2) 
+      {\texttt{Bus}};
+    
+    \node [draw, rectangle, fill=green!20, minimum width=2.5cm, minimum height=1cm, below right=1cm and 0.5cm of padre] (hijo3) 
+      {\texttt{Truck}};
+    
+    \draw[<-, thick] (padre) -- (hijo1);
+    \draw[<-, thick] (padre) -- (hijo2);
+    \draw[<-, thick] (padre) -- (hijo3);
+  \end{tikzpicture}
+  \caption{Jerarquía de herencia a partir de la superclase Vehicle.}
+  \label{fig:herencia_vehiculos}
+\end{figure}
+
+\begin{lstlisting}[caption={Sintaxis básica de herencia en Python.}, label={list:herencia_basica}]
+class Vehicle:
+    def __init__(self, name, max_speed):
+        self.name = name
+        self.max_speed = max_speed
+
+    def display_info(self):
+        print(f"Vehiculo: {self.name}, Velocidad Maxima: {self.max_speed} km/h")
+
+# Bus hereda de Vehicle
+class Bus(Vehicle):
+    pass
+
+b = Bus("Mercedes Benz", 120)
+b.display_info()  # Metodo heredado de Vehicle
+\end{lstlisting}
+
+\section{Sobrescritura de Métodos y Uso de \texttt{super()}}
+En muchas situaciones, una subclase necesita adaptar o extender el comportamiento de un método heredado.
+Este proceso se denomina \textit{sobrescritura de métodos} (\textit{method overriding}).
+
+Para reutilizar la lógica de la superclase en lugar de reescribirla por completo, Python proporciona la función \texttt{super()}.
+
+\begin{lstlisting}[caption={Uso de \texttt{super()} para extender el constructor y métodos.}, label={list:super_ejemplo}]
+class Vehicle:
+    def __init__(self, name, max_speed, mileage):
+        self.name = name
+        self.max_speed = max_speed
+        self.mileage = mileage
+
+    def fare(self):
+        return self.mileage * 10
+
+class Bus(Vehicle):
+    def __init__(self, name, max_speed, mileage, capacity=50):
+        # Llama al constructor de la superclase Vehicle
+        super().__init__(name, max_speed, mileage)
+        self.capacity = capacity
+
+    def fare(self):
+        # Sobrescribe el metodo agregando un 10% de mantenimiento
+        base_fare = super().fare()
+        total_fare = base_fare + (base_fare * 0.10)
+        return total_fare
+
+bus = Bus("Escolar", 90, 100, 40)
+print(f"Tarifa del colectivo: ${bus.fare()}")
+\end{lstlisting}
+
+\section{Inspección de Tipos y Jerarquías}
+Python dispone de funciones integradas para consultar la pertenencia de un objeto a una clase o jerarquía:
+
+\begin{itemize}[leftmargin=*]
+  \item \texttt{type(obj)}: retorna la clase exacta a la cual pertenece un objeto.
+  \item \texttt{isinstance(obj, Clase)}: comprueba si un objeto es una instancia de la clase especificada o de una subclase derivada de ella.
+  \item \texttt{issubclass(Subclase, Superclase)}: verifica si una clase hereda de otra superclase.
+\end{itemize}
+
+\begin{lstlisting}[caption={Uso de \texttt{isinstance()} e \texttt{issubclass()}.}, label={list:inspeccion_tipos}]
+b = Bus("Urbano", 80, 50)
+
+print(type(b))                       # <class '__main__.Bus'>
+print(isinstance(b, Bus))           # True
+print(isinstance(b, Vehicle))       # True (por herencia)
+print(issubclass(Bus, Vehicle))     # True
+\end{lstlisting}
+
+\section{Polimorfismo}
+El \textit{polimorfismo} es la capacidad que poseen distintos objetos de responder al mismo mensaje o llamada
+de método, ejecutando cada uno su propia implementación específica.
+
+En Python, el polimorfismo se aplica frecuentemente mediante el principio de \textit{Duck Typing} (``Si camina como
+un pato y suena como un pato, entonces es un pato''). Esto significa que a una función no le importa la clase exacta
+del objeto recibido, sino que este responda a los métodos invocados.
+
+\begin{lstlisting}[caption={Polimorfismo con jerarquía de animales.}, label={list:polimorfismo_animales}]
+class Dog:
+    def speak(self):
+        return "Guau!"
+
+class Cat:
+    def speak(self):
+        return "Miau!"
+
+def hacer_sonar(animal):
+    # Invoca speak() de forma polimorfica sin importar el tipo exacto
+    print(animal.speak())
+
+mascotas = [Dog(), Cat()]
+for m in mascotas:
+    hacer_sonar(m)
+\end{lstlisting}
+
+Un ejemplo aplicado al cálculo de salarios en un sistema de recursos humanos ilustra el valor del polimorfismo:
+
+\begin{lstlisting}[caption={Polimorfismo aplicado al cálculo de salarios.}, label={list:polimorfismo_empleados}]
+class Employee:
+    def __init__(self, name):
+        self.name = name
+
+    def calculate_salary(self):
+        raise NotImplementedError("Las subclases deben implementar este metodo.")
+
+class FullTimeEmployee(Employee):
+    def __init__(self, name, monthly_salary):
+        super().__init__(name)
+        self.monthly_salary = monthly_salary
+
+    def calculate_salary(self):
+        return self.monthly_salary
+
+class PartTimeEmployee(Employee):
+    def __init__(self, name, hours_worked, hourly_rate):
+        super().__init__(name)
+        self.hours_worked = hours_worked
+        self.hourly_rate = hourly_rate
+
+    def calculate_salary(self):
+        return self.hours_worked * self.hourly_rate
+
+empleados = [
+    FullTimeEmployee("Carlos", 350000),
+    PartTimeEmployee("Ana", 80, 2500)
+]
+
+for e in empleados:
+    print(f"Empleado: {e.name}, Salario: ${e.calculate_salary()}")
+\end{lstlisting}

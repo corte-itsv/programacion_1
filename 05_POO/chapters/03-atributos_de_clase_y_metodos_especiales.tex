@@ -1,0 +1,124 @@
+\chapter{Atributos de Clase y Métodos Especiales}
+
+\section{Atributos de Clase vs Atributos de Instancia}
+En Python existen dos tipos de atributos según su ámbito de pertenencia:
+
+\begin{itemize}[leftmargin=*]
+  \item \textit{Atributos de instancia}: pertenecen a un objeto específico y son inicializados habitualmente
+    dentro del método \texttt{\_\_init\_\_} mediante \texttt{self.atributo}. Cada instancia mantiene su propia copia.
+  \item \textit{Atributos de clase}: se definen directamente en el cuerpo de la clase (fuera de cualquier método)
+    y son compartidos por todas las instancias creadas a partir de dicha clase.
+\end{itemize}
+
+\begin{lstlisting}[caption={Diferencia entre atributos de clase y de instancia.}, label={list:atributos_clase}]
+class Student:
+    # Atributo de clase (compartido por todos los estudiantes)
+    school_name = "Instituto Técnico Salesiano Villada"
+
+    def __init__(self, name, age):
+        # Atributos de instancia (unicos para cada objeto)
+        self.name = name
+        self.age = age
+
+e1 = Student("Lucas", 16)
+e2 = Student("Sofia", 16)
+
+print(e1.school_name)  # Muestra el valor de clase
+print(e2.school_name)
+
+# Modificacion mediante el nombre de la clase
+Student.school_name = "ITSV Cordoba"
+print(e1.school_name)  # Refleja el cambio en todas las instancias
+\end{lstlisting}
+
+Si se modifica un atributo de clase utilizando la referencia del nombre de la clase (\texttt{Student.school\_name}),
+el cambio impacta en todas las instancias que no hayan sobrescrito dicho atributo a nivel de instancia.
+
+\section{Métodos Especiales (Dunder Methods)}
+Los métodos especiales, conocidos popularmente como \textit{dunder methods} (por la abreviatura de \textit{double underscore}),
+son métodos cuyo nombre inicia y finaliza con dos guiones bajos, como por ejemplo \texttt{\_\_init\_\_}.
+Python los utiliza para sobrecargar operadores y personalizar comportamientos integrados del lenguaje.
+
+\subsection{Representación como Cadena: \texttt{\_\_str\_\_} y \texttt{\_\_repr\_\_}}
+Cuando se imprime un objeto mediante \texttt{print()} o se convierte a cadena con \texttt{str()}, Python busca
+el método \texttt{\_\_str\_\_}. Cuando se inspecciona en la consola interactiva o dentro de colecciones, se utiliza \texttt{\_\_repr\_\_}.
+
+\begin{itemize}[leftmargin=*]
+  \item \texttt{\_\_str\_\_}: pensado para presentar una salida amigable y legible para el usuario final.
+  \item \texttt{\_\_repr\_\_}: pensado para proporcionar una representación inequívoca, útil para desarrolladores durante el proceso de depuración.
+\end{itemize}
+
+\begin{lstlisting}[caption={Implementación de \texttt{\_\_str\_\_} y \texttt{\_\_repr\_\_}.}, label={list:str_repr}]
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+
+    def __str__(self):
+        return f"'{self.title}' escrito por {self.author}"
+
+    def __repr__(self):
+        return f"Book(title='{self.title}', author='{self.author}')"
+
+libro = Book("Python Crash Course", "Eric Matthes")
+print(str(libro))   # Invoca __str__
+print(repr(libro))  # Invoca __repr__
+\end{lstlisting}
+
+\subsection{Sobrecarga de Operadores Aritméticos: \texttt{\_\_add\_\_}}
+La sobrecarga de operadores permite definir cómo se comportarán los operadores matemáticos estándar
+(como \texttt{+}, \texttt{-}, \texttt{*}) cuando se apliquen sobre objetos de nuestras propias clases.
+
+\begin{lstlisting}[caption={Sobrecarga del operador suma mediante \texttt{\_\_add\_\_}.}, label={list:vector_add}]
+class Vector2D:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __add__(self, other):
+        if isinstance(other, Vector2D):
+            return Vector2D(self.x + other.x, self.y + other.y)
+        return NotImplemented
+
+    def __str__(self):
+        return f"Vector({self.x}, {self.y})"
+
+v1 = Vector2D(2, 4)
+v2 = Vector2D(3, 1)
+v3 = v1 + v2  # Invoca v1.__add__(v2)
+print(v3)     # Salida: Vector(5, 5)
+\end{lstlisting}
+
+\subsection{Métodos Especiales \texttt{\_\_len\_\_} y \texttt{\_\_call\_\_}}
+El método \texttt{\_\_len\_\_} permite a una clase responder a la función integrada \texttt{len()}.
+
+\begin{lstlisting}[caption={Uso de \texttt{\_\_len\_\_} para calcular la cantidad de elementos.}, label={list:cart_len}]
+class ShoppingCart:
+    def __init__(self):
+        self.items = []
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def __len__(self):
+        return len(self.items)
+
+cart = ShoppingCart()
+cart.add_item("Manzana")
+cart.add_item("Pan")
+print(f"Cantidad de productos: {len(cart)}")
+\end{lstlisting}
+
+Por otro lado, el método \texttt{\_\_call\_\_} permite que una instancia de una clase sea invocada como si fuera una función.
+
+\begin{lstlisting}[caption={Instancia invocable con \texttt{\_\_call\_\_}.}, label={list:call_method}]
+class Multiplier:
+    def __init__(self, factor):
+        self.factor = factor
+
+    def __call__(self, x):
+        return x * self.factor
+
+duplicar = Multiplier(2)
+print(duplicar(5))  # Retorna 10
+\end{lstlisting}

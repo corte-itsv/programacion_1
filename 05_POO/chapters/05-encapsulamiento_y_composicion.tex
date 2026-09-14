@@ -1,0 +1,148 @@
+\chapter{Encapsulamiento y Composición}
+
+\section{Encapsulamiento y Ocultamiento de Información}
+El \textit{encapsulamiento} es el principio de la POO que consiste en ocultar los detalles internos de implementación
+de un objeto y restringir el acceso directo a sus atributos desde el exterior del código de la clase.
+Esto evita que los datos internos sean modificados de forma arbitraria o inconsistente.
+
+A diferencia de lenguajes como C++ o Java, Python no posee palabras clave como \texttt{private} o \texttt{protected}
+a nivel de compilador, sino que emplea convenciones de nombres para indicar la privacidad de los miembros.
+
+\subsection{Atributos Protegidos (\texttt{\_atributo})}
+Un atributo cuyo nombre comienza con un único guion bajo (por ejemplo, \texttt{\_balance}) indica convencionalmente
+que es un miembro protegido. Aunque Python permite acceder a él desde el exterior, la regla indica que solo debería
+ser utilizado internamente por la clase y sus subclases.
+
+\subsection{Atributos Privados (\texttt{\_\_atributo}) y Name Mangling}
+Cuando un atributo comienza con dos guiones bajos (por ejemplo, \texttt{\_\_balance}), Python activa un mecanismo
+llamado \textit{Name Mangling} (modificación de nombres). El interprete transforma internamente el nombre del atributo
+agregando el prefijo \texttt{\_NombreDeClase}, lo que dificulta su acceso o modificación accidental desde afuera.
+
+\begin{lstlisting}[caption={Diferencia entre atributos protegidos y privados.}, label={list:name_mangling}]
+class BankAccount:
+    def __init__(self, owner, balance):
+        self.owner = owner
+        self._protected_data = "Dato protegido"
+        self.__balance = balance  # Atributo privado
+
+cuenta = BankAccount("Laura", 5000)
+
+print(cuenta.owner)            # Acceso directo permitido
+print(cuenta._protected_data)  # Permitido por sintaxis, pero desaconsejado
+
+# El acceso a cuenta.__balance arroja AttributeError
+# Para acceder forzadamente (mangling): print(cuenta._BankAccount__balance)
+\end{lstlisting}
+
+\section{Propiedades (\texttt{@property} y Setters)}
+En lugar de escribir métodos de acceso tradicionales al estilo Java (como \texttt{get\_balance()} y \texttt{set\_balance()}),
+Python ofrece una alternativa elegante y concisa mediante decoradores de \textit{propiedades}: \texttt{@property} para el getter
+y \texttt{@propiedad.setter} para el setter.
+
+Las propiedades permiten acceder y modificar atributos privados mediante la notación habitual de atributos (\texttt{obj.balance = 100}),
+pero ejecutando código de validación transparente detrás de escena.
+
+\begin{lstlisting}[caption={Uso de \texttt{@property} para validar la asignación de saldo.}, label={list:property_setter}]
+class BankAccount:
+    def __init__(self, balance):
+        self._balance = balance
+
+    @property
+    def balance(self):
+        """Getter: retorna el saldo protegido."""
+        return self._balance
+
+    @balance.setter
+    def balance(self, amount):
+        """Setter: valida que el saldo no sea negativo."""
+        if amount < 0:
+            raise ValueError("El saldo no puede ser negativo.")
+        self._balance = amount
+
+cuenta = BankAccount(1000)
+print(f"Saldo inicial: {cuenta.balance}")  # Invoca el getter
+
+cuenta.balance = 1500                     # Invoca el setter con validacion
+print(f"Nuevo saldo: {cuenta.balance}")
+\end{lstlisting}
+
+\section{Relaciones entre Objetos: Composición y Agregación}
+Mientras que la herencia modela una relación del tipo \textit{``es-un''} (un colectivo \textit{es un} vehículo),
+la \textit{composición} y la \textit{agregación} modelan relaciones del tipo \textit{``tiene-un''}.
+
+La composición ocurre cuando una clase compleja contiene instancias de otras clases como atributos propios,
+coordinando la interacción entre dichos objetos.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[node distance=2cm, align=center]
+    \node [draw, rectangle, fill=blue!20, minimum width=3.5cm, minimum height=1.5cm] (vuelo) 
+      {\textbf{Contenedor}\\ \texttt{Flight}};
+    
+    \node [draw, rectangle, fill=green!20, minimum width=3.5cm, minimum height=1.2cm, right=2.5cm of vuelo] (pasajero) 
+      {\textbf{Componente}\\ \texttt{Passenger}};
+    
+    \draw[->, thick, double] (vuelo) -- node[above] {\small Contiene lista de} (pasajero);
+  \end{tikzpicture}
+  \caption{Relación de Composición: Un Vuelo contiene una lista de Pasajeros.}
+  \label{fig:composicion_vuelo}
+\end{figure}
+
+A continuación se presenta una clase \texttt{Flight} que gestiona la reserva y capacidad ocupada por objetos \texttt{Passenger}:
+
+\begin{lstlisting}[caption={Ejemplo de Composición con clases Flight y Passenger.}, label={list:composicion_flight}]
+class Passenger:
+    def __init__(self, name, passport_number):
+        self.name = name
+        self.passport_number = passport_number
+
+class Flight:
+    def __init__(self, flight_number, capacity):
+        self.flight_number = flight_number
+        self.capacity = capacity
+        self.passengers = []  # Lista que almacenara objetos Passenger
+
+    def add_passenger(self, passenger):
+        if len(self.passengers) < self.capacity:
+            self.passengers.append(passenger)
+            print(f"Pasajero {passenger.name} abordado con exito.")
+            return True
+        else:
+            print("Vuelo completo. No se pudo agregar al pasajero.")
+            return False
+
+p1 = Passenger("Carlos Gomez", "AB123456")
+p2 = Passenger("Maria Lopez", "CD789012")
+
+vuelo = Flight("AR1302", 2)
+vuelo.add_passenger(p1)
+vuelo.add_passenger(p2)
+\end{lstlisting}
+
+Del mismo modo, la composición permite implementar patrones donde una clase administradora procesa de forma polimórfica
+una colección de objetos contenidos en su interior:
+
+\begin{lstlisting}[caption={Clase Zoo administrando una colección polimórfica de animales.}, label={list:zoo_animales}]
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def eat(self):
+        return f"{self.name} esta comiendo."
+
+class Zoo:
+    def __init__(self):
+        self.animals = []
+
+    def add_animal(self, animal):
+        self.animals.append(animal)
+
+    def feed_all(self):
+        for animal in self.animals:
+            print(animal.eat())
+
+zoo = Zoo()
+zoo.add_animal(Animal("Leon"))
+zoo.add_animal(Animal("Panda"))
+zoo.feed_all()
+\end{lstlisting}

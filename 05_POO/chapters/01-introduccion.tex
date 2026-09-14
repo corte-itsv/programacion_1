@@ -1,0 +1,78 @@
+\chapter{Introducción a la POO}
+
+\section{De la Programación Estructurada a la POO}
+En los primeros cursos de programación, el enfoque predominante es el paradigma estructurado.
+En la programación estructurada, las estructuras de datos (variables, listas, diccionarios)
+y los procedimientos (funciones) se mantienen separados. Las funciones reciben datos como argumentos,
+los procesan y retornan un resultado.
+
+Sin embargo, a medida que los problemas de software aumentan en complejidad, la separación entre
+datos y funciones dificulta el mantenimiento y la escalabilidad del código.
+La \textit{Programación Orientada a Objetos} (POO) propone una forma distinta de organizar y estructurar
+el código: agrupar los datos y las acciones que los manipulan dentro de una misma entidad llamada \textit{objeto}.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[node distance=2cm, auto]
+    % Estructurada
+    \node [draw, rectangle, fill=gray!20, minimum width=3cm, minimum height=1cm] (datos) {Datos};
+    \node [draw, rectangle, fill=gray!20, minimum width=3cm, minimum height=1cm, right=1.5cm of datos] (func) {Funciones};
+    \draw[<->, thick] (datos) -- node[above] {\small Separados} (func);
+    
+    % POO
+    \node [draw, rectangle, fill=blue!10, minimum width=4cm, minimum height=2.5cm, right=2.5cm of func] (objeto) {};
+    \node [above] at (objeto.north) {\textit{Objeto}};
+    \node [draw, rectangle, fill=blue!30, minimum width=3cm, baseline] at ($(objeto.center)+(0,0.5)$) {Estado (Datos)};
+    \node [draw, rectangle, fill=blue!30, minimum width=3cm, baseline] at ($(objeto.center)+(0,-0.5)$) {Comportamiento};
+  \end{tikzpicture}
+  \caption{Comparación entre Programación Estructurada y Programación Orientada a Objetos.}
+  \label{fig:estructurada_vs_poo}
+\end{figure}
+
+Como se ilustra en la \fig{fig:estructurada_vs_poo}, la POO permite integrar el estado y el comportamiento
+en un bloque cohesivo, facilitando el modelado de sistemas complejos.
+
+\section{¿Qué es un Objeto?}
+En el mundo real, un objeto es cualquier entidad física o abstracta que posee características y realiza acciones.
+Por ejemplo, un fibrón de pizarra tiene características como color, marca y masa, y realiza acciones como
+escribir o ser borrado. Del mismo modo, un automóvil tiene un modelo, patente, kilometraje y color, y acciones
+como acelerar, frenar o doblar.
+
+En programación, un \textit{objeto} es un modelo conceptual que almacena información y define comportamientos
+asociados. Todo objeto se compone de dos elementos fundamentales:
+
+\begin{itemize}[leftmargin=*]
+  \item \textit{Atributos}: representan el estado o las características del objeto (por ejemplo, el saldo de una cuenta bancaria).
+  \item \textit{Métodos}: representan las acciones o procedimientos que el objeto puede ejecutar (por ejemplo, depositar o retirar dinero).
+\end{itemize}
+
+\section{Clases y Objetos: Moldes e Instancias}
+Para crear objetos en un programa, primero debemos definir su estructura mediante una \textit{clase}.
+Una clase funciona como un plano o plantilla arquitectónica que especifica qué atributos y métodos
+tendrán los objetos construidos a partir de ella.
+
+Un \textit{objeto} es una \textit{instancia} concreta de una clase. Aunque dos personas tengan un automóvil
+del mismo modelo (construidos con el mismo plano), cada automóvil es un objeto independiente con su propia
+patente, kilometraje acumulado y estado de desgaste.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}[node distance=2.5cm]
+    \node [draw, rectangle, fill=orange!20, minimum width=3.5cm, minimum height=1.5cm, align=center] (clase) 
+      {\textbf{Clase (Plano)}\\ \texttt{Automovil}};
+    
+    \node [draw, rectangle, fill=green!20, minimum width=3.5cm, minimum height=1.2cm, align=center, below left=1cm and 0.5cm of clase] (obj1) 
+      {\textit{Instancia 1}\\ Auto A (Verde)};
+    
+    \node [draw, rectangle, fill=green!20, minimum width=3.5cm, minimum height=1.2cm, align=center, below right=1cm and 0.5cm of clase] (obj2) 
+      {\textit{Instancia 2}\\ Auto B (Rojo)};
+    
+    \draw[->, thick] (clase) -- node[left] {\small Instanciación} (obj1);
+    \draw[->, thick] (clase) -- node[right] {\small Instanciación} (obj2);
+  \end{tikzpicture}
+  \caption{Relación entre una Clase (plantilla) y sus Instancias (objetos reales).}
+  \label{fig:clase_objeto}
+\end{figure}
+
+Como se observa en la \fig{fig:clase_objeto}, una única definición de clase permite instanciar múltiples objetos
+con valores de atributos independientes en memoria.

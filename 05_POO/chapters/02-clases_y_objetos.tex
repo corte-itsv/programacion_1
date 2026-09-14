@@ -1,0 +1,147 @@
+\chapter{Clases, Objetos y Atributos de Instancia}
+
+\section{Definición de una Clase en Python}
+Para declarar una clase en Python se utiliza la palabra reservada \texttt{class}, seguida del nombre de la clase
+(escrito convencionalmente en formato \textit{CamelCase}) y dos puntos.
+Si deseamos definir una clase vacía sin atributos ni métodos iniciales, empleamos la sentencia \texttt{pass} como
+marcador de posición sintáctico.
+
+\begin{lstlisting}[caption={Definición de una clase vacía y su instanciación.}, label={list:clase_vacia}]
+class Vehicle:
+    """Clase base que representa un vehiculo generico."""
+    pass
+
+# Inspeccion del objeto clase
+print(Vehicle)
+\end{lstlisting}
+
+En el \sect{list:clase_vacia} se observa el uso de un \textit{docstring} (cadena literal encerrada entre tres comillas),
+el cual permite documentar la función o propósito de la clase directamente en el código fuente.
+
+\section{El Constructor \texttt{\_\_init\_\_} y el Parámetro \texttt{self}}
+Cuando se crea una nueva instancia de una clase, Python ejecuta automáticamente un método especial de inicialización
+llamado \texttt{\_\_init\_\_}. Este método actúa como el constructor de la clase, reservando espacio y asignando los
+valores iniciales a los atributos del objeto.
+
+El primer parámetro de todo método de instancia en Python debe ser obligatoriamente \texttt{self}. El parámetro
+\texttt{self} es una referencia explícita a la instancia concreta sobre la cual se está ejecutando el método.
+
+\begin{lstlisting}[caption={Uso del constructor y asignación de atributos de instancia.}, label={list:init_atributos}]
+class Vehicle:
+    """Representa un vehiculo con velocidad maxima y kilometraje."""
+    
+    def __init__(self, name, max_speed, mileage):
+        self.name = name
+        self.max_speed = max_speed
+        self.mileage = mileage
+
+# Instanciacion de objetos independientes
+v1 = Vehicle("Tesla Model S", 250, 18)
+v2 = Vehicle("Toyota Corolla", 180, 45000)
+
+print(f"Vehiculo 1: {v1.name}, Maxima: {v1.max_speed} km/h")
+print(f"Vehiculo 2: {v2.name}, Maxima: {v2.max_speed} km/h")
+\end{lstlisting}
+
+Al ejecutar la línea \texttt{v1 = Vehicle("Tesla Model S", 250, 18)}, Python invoca internamente a
+\texttt{Vehicle.\_\_init\_\_(v1, "Tesla Model S", 250, 18)}. La notación de punto (\texttt{v1.name})
+permite acceder a los atributos específicos almacenados en esa instancia.
+
+\section{Métodos de Instancia}
+Los métodos de instancia son funciones definidas dentro de una clase que operan sobre los datos almacenados
+en los atributos de la instancia actual. A través del parámetro \texttt{self}, los métodos pueden leer o modificar
+el estado interno del objeto.
+
+\subsection{Cálculos Derivados a partir de Atributos}
+Un patrón habitual en POO es la creación de métodos que calculan nueva información utilizando los atributos
+almacenados en la instancia.
+
+\begin{lstlisting}[caption={Clase Rectangle con métodos de cálculo geométrico.}, label={list:rectangle}]
+class Rectangle:
+    def __init__(self, length, width):
+        self.length = length
+        self.width = width
+
+    def area(self):
+        """Calcula el area del rectangulo."""
+        return self.length * self.width
+
+    def perimeter(self):
+        """Calcula el perimetro del rectangulo."""
+        return 2 * (self.length + self.width)
+
+rect = Rectangle(10, 4)
+print(f"Area: {rect.area()}")
+print(f"Perimetro: {rect.perimeter()}")
+\end{lstlisting}
+
+Al llamar a \texttt{rect.area()}, no es necesario pasar el argumento \texttt{self} explícitamente, ya que Python
+asocia automáticamente el objeto \texttt{rect} invocante.
+
+\subsection{Validación de Datos y Reglas de Negocio}
+Los métodos también se utilizan para imponer restricciones y validar las operaciones sobre el estado interno.
+Un ejemplo clásico es la gestión de cuentas bancarias con protección contra sobregiros.
+
+\begin{lstlisting}[caption={Clase BankAccount con validación de saldo.}, label={list:bank_account}]
+class BankAccount:
+    def __init__(self, owner, balance=0.0):
+        self.owner = owner
+        self.balance = balance
+
+    def deposit(self, amount):
+        if amount > 0:
+            self.balance += amount
+            print(f"Deposito de {amount} exitoso. Saldo actual: {self.balance}")
+        else:
+            print("El monto a depositar debe ser positivo.")
+
+    def withdraw(self, amount):
+        if amount > self.balance:
+            print("Fondos insuficientes. Operacion cancelada.")
+        elif amount <= 0:
+            print("Monto de retiro invalido.")
+        else:
+            self.balance -= amount
+            print(f"Retiro de {amount} exitoso. Saldo restante: {self.balance}")
+
+cuenta = BankAccount("Juan", 1000)
+cuenta.deposit(500)
+cuenta.withdraw(2000)  # Muestra mensaje de fondos insuficientes
+\end{lstlisting}
+
+\subsection{Gestión del Estado Interno y Alternancia de Estados}
+Los objetos pueden cambiar de estado mediante métodos dedicados a modificar variables booleanas o banderas internas.
+
+\begin{lstlisting}[caption={Clase Light con métodos para alternar su estado.}, label={list:light}]
+class Light:
+    def __init__(self):
+        self.is_on = False
+
+    def turn_on(self):
+        self.is_on = True
+
+    def turn_off(self):
+        self.is_on = False
+
+    def toggle(self):
+        self.is_on = not self.is_on
+\end{lstlisting}
+
+\section{Atributos con Estructuras de Datos Complejas}
+Los atributos de una instancia no se limitan a tipos primarios (enteros, cadenas, flotantes); también pueden
+almacenar colecciones completas como listas, diccionarios o conjuntos.
+
+\begin{lstlisting}[caption={Clase Student almacenando una lista de notas.}, label={list:student}]
+class Student:
+    def __init__(self, name, marks):
+        self.name = name
+        self.marks = marks  # Lista de numeros flotantes o enteros
+
+    def average(self):
+        if not self.marks:
+            return 0.0
+        return sum(self.marks) / len(self.marks)
+
+s1 = Student("Alice", [85, 90, 78, 92, 88])
+print(f"Promedio de {s1.name}: {s1.average():.2f}")
+\end{lstlisting}
